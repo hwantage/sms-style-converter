@@ -2,7 +2,8 @@
   "name": "sms-style-converter",
   "displayName": "SMS 스타일 변환기",
   "description": "스타일 태그 내의 CSS를 기존 클래스로 변환합니다.",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "publisher": "hwan77",
   "engines": {
     "vscode": "^1.89.0"
   },
@@ -37,7 +38,25 @@
         "mac": "cmd+shift+s",
         "when": "editorHasSelection"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "SMS Style Converter",
+      "properties": {
+        "smsStyleConverter.sourceCssFiles": {
+          "type": "array",
+          "default": [
+            "/DLPCenter.View.Web/src/main/webapp/dist/css/main_deco_1.css",
+            "/DLPCenter.View.Web/src/main/webapp/dist/css/vendors_deco_1.css"
+          ],
+          "description": "스타일 매칭에 사용할 소스 CSS 파일 경로 목록"
+        },
+        "smsStyleConverter.generatedCssFile": {
+          "type": "string",
+          "default": "/DLPCenter.View.Web/src/main/webapp/css2/cspfix.css",
+          "description": "새로운 클래스가 생성될 CSS 파일 경로"
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
