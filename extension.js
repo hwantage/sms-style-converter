@@ -155,7 +155,7 @@ function parseStyleAttribute(text) {
 	return null;
 }
 
-function extractCIfTags(text) {
+function parseText(text) {
 	const result = {
 		cssText: text,
 		cifBlocks: []
@@ -247,21 +247,17 @@ function activate(context) {
 			'/DLPCenter.View.Web/src/main/webapp/css2/cspfix.css'
 		);
 
-		// 기존의 cssFiles 배열을 설정값으로 대체
 		const cssFiles = [...sourceCssFiles, generatedCssFile];
-
 		const selection = editor.selection;
 		const text = editor.document.getText(selection);
-		const {cssText, cifBlocks} = extractCIfTags(text);
-
-		// style 속성 또는 CSS 선언 파싱
-		const styleInfo = parseStyleAttribute(cssText.trim());
+		const {cssText, cifBlocks} = parseText(text);
+		const styleInfo = parseStyleAttribute(cssText.trim()); // style="..." 형태의 선언인지 확인 및 내용 파싱
 		let styleValue = "";	// 스타일 속성 값 단독 처리
 
 		if (!styleInfo) {	// style="..." 형태가 아닌 경우 단독 선택 여부 추가 확인
-			if (isValidCssDeclaration(cssText.trim())) {	// 유효한 CSS 선언인 경우
+			if (isValidCssDeclaration(cssText.trim())) {	// 속성 값이 단독 선택이며 유효한 CSS 선언인 경우
 				styleValue = {
-					quote: '',  // 기본 따옴표 설정
+					quote: '',  // 기본 따옴표 없음
 					styles: cssText
 				};
 			} else {
@@ -274,10 +270,10 @@ function activate(context) {
 		const hasDisplayNone = /display\s*:\s*none\s*;?\s*/.test(styles);
 		
 		// display:none 제거
-		let processedStyles = styles.replace(/display\s*:\s*none\s*;?\s*/g, '').replace(/;\s*$/, '');
-		const minifiedStyles = minifyCss(processedStyles);
+		let displayNoneRemovedStyles = styles.replace(/display\s*:\s*none\s*;?\s*/g, '').replace(/;\s*$/, '');
+		const minifiedStyles = minifyCss(displayNoneRemovedStyles);
 
-		// 스타일이 비어있으면 처리하지 않음
+		// minifiedStyles 가 빈 값이거나 display:none 만 있는 경우 처리
 		if (!minifiedStyles) {
 			const className = hasDisplayNone ? 'hide' : '';
 			if (styleValue !== ""){
@@ -287,8 +283,8 @@ function activate(context) {
 			} else {
 				// c:if 블록 처리
 				const cifResults = cifBlocks.map(block => {
-					const className = processCIfBlock(block.css, cssFiles);
-					return className ? `<c:if test="${block.condition}">${className}</c:if>` : '';
+					const cifBlockClassName = processCIfBlock(block.css, cssFiles);
+					return cifBlockClassName ? `<c:if test="${block.condition}">${cifBlockClassName}</c:if>` : '';
 				}).filter(result => result);
 
 				await editor.edit(editBuilder => {
@@ -305,6 +301,9 @@ function activate(context) {
 					}
 				});
 			}
+			
+			vscode.window.showInformationMessage(`스타일 값이 성공적으로 변환되었습니다`);
+
 			return;
 		}
 
@@ -342,8 +341,8 @@ function activate(context) {
 		if (styleValue === ""){
 			// c:if 블록 처리
 			const cifResults = cifBlocks.map(block => {
-				const className = processCIfBlock(block.css, cssFiles);
-				return className ? `<c:if test="${block.condition}">${className}</c:if>` : '';
+				const cifBlockClassName = processCIfBlock(block.css, cssFiles);
+				return cifBlockClassName ? `<c:if test="${block.condition}">${cifBlockClassName}</c:if>` : '';
 			}).filter(result => result);
 
 			await editor.edit(editBuilder => {
