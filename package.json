@@ -2,7 +2,7 @@
   "name": "sms-style-converter",
   "displayName": "SMS 스타일 변환기",
   "description": "스타일 태그 내의 CSS를 기존 클래스로 변환합니다.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "hwan77",
   "engines": {
     "vscode": "^1.89.0"
