@@ -81,7 +81,7 @@ function findMatchingClass(cssContent, targetStyle) {
 				.map(decl => `${decl.property}:${decl.value}`)
 				.join(';');
 
-			if (declarations === targetStyle) {
+			if (declarations === targetStyle || declarations.replace(/\s*!important\s*$/, '') === targetStyle) {
 				// 클래스 이름에서 . 제거
 				return selector.substring(1);
 			}
@@ -289,9 +289,9 @@ function activate(context) {
 
 				await editor.edit(editBuilder => {
 					if (className) {
-						const classAttr = className.length > 0 ? 
+						const classAttr = cifResults.length > 0 ? 
 							`class=${quote}${className} ${cifResults.join(' ')}${quote}` :
-							`class=${quote}${cifResults.join(' ')}${quote}`;
+							`class=${quote}${className}${quote}`;
 						editBuilder.replace(selection, classAttr);
 					} else {
 						const classAttr = cifResults.length > 0 ? 
